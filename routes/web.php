@@ -38,7 +38,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/chat/{id?}', \App\Http\Controllers\ChatGptStoreController::class)->name('chat.store');
 });
 
-Route::get('/telegram', [\App\Http\Controllers\Telegram\IndexController::class, 'index']);
+
+Route::post('/webhook', [\App\Http\Controllers\Telegram\IndexController::class, 'index']);
+
 
 
 require __DIR__.'/auth.php';
