@@ -38,11 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/chat/{id?}', \App\Http\Controllers\ChatGptStoreController::class)->name('chat.store');
 });
 
-Route::get('/test', function () {
-    \Illuminate\Support\Facades\Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendMessage', [
-        'chat_id' => 294041458,
-        'text' => 'Hello'
-    ]);
-});
+Route::get('/telegram', [\App\Http\Controllers\Telegram\IndexController::class, 'index']);
+
 
 require __DIR__.'/auth.php';
