@@ -23,16 +23,15 @@ class IndexController extends Controller
                 'name' => $request->input('message')['from']['first_name'],
             ]);
 
-//        $messages[] = ['role' => 'user', 'content' => $request->input('message')['text']];
-//        $response = OpenAI::chat()->create([
-//            'model' => 'gpt-3.5-turbo',
-//            'messages' => $messages
-//        ]);
+        $messages[] = ['role' => 'user', 'content' => $request->input('message')['text']];
+        $response = OpenAI::chat()->create([
+            'model' => 'gpt-3.5-turbo',
+            'messages' => $messages
+        ]);
         Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendMessage', [
             'chat_id' => 294041458,
-            'text' => 'hello'
+            'text' => $response->choices[0]->message->content
         ]);
-//        $response->choices[0]->message->content;
 
     }
 }
