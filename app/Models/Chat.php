@@ -10,7 +10,7 @@ class Chat extends Model
     use HasFactory;
 
     protected $table = 'chats';
-    protected $fillable = ['user_id', 'context'];
+    protected $fillable = ['user_id', 'context', 'telegram_id'];
     protected $casts = [
         'context' => 'array'
     ];
