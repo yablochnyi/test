@@ -36,6 +36,7 @@ class IndexController extends Controller
                 'telegram_id' => $request->input('message')['from']['id'],
             ],
             [
+                'user_id' => $user->id,
                 'context' => $messages
             ]);
         Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendMessage', [
