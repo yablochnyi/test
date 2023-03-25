@@ -65,15 +65,11 @@ class MessageController extends Controller
 
     public function saveChatContext($user, Request $request, $messages, $response)
     {
-        Chat::updateOrCreate(
-            [
+        Chat::create([
                 'telegram_id' => $request->input('message')['from']['id'],
-            ],
-            [
                 'user_id' => $user->id,
                 'context' => array_merge($messages, [['role' => 'assistant', 'content' => $response->choices[0]->message->content]])
-            ]
-        );
+            ]);
     }
 
     public function sendAssistantResponse(Request $request, $response)
