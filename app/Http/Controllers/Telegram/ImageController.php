@@ -58,7 +58,7 @@ class ImageController extends Controller
     public function getAssistantResponse($messages): \OpenAI\Responses\Images\CreateResponse
     {
         $response = OpenAI::images()->create([
-            'prompt' => $messages,
+            'prompt' => $messages[0]['content'],
             'n' => 1,
             'size' => '256x256',
             'response_format' => 'url',
