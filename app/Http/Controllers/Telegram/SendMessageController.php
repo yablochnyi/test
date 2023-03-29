@@ -12,10 +12,12 @@ class SendMessageController extends Controller
     public function __invoke($message)
     {
         $users = User::get();
-        dd($users);
-        Http::post('https://api.tlgr.org/bot' . config('bots')['api'] . '/sendMessage', [
-            'chat_id' => 294041458,
-            'text' => $message,
-        ]);
+        foreach ($users as $user)
+        {
+            Http::post('https://api.tlgr.org/bot' . config('bots')['api'] . '/sendMessage', [
+                'chat_id' => $user['telegram_id'],
+                'text' => $message,
+            ]);
+        }
     }
 }

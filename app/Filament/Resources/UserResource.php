@@ -28,17 +28,16 @@ class UserResource extends Resource
                     ->required()
                     ->rule('string'),
                 Forms\Components\TextInput::make('username')
-                    ->required()
                     ->rule('string'),
                 Forms\Components\TextInput::make('email')
-                    ->required()
                     ->rule('string'),
                 Forms\Components\TextInput::make('password')
                     ->password()
                     ->dehydrateStateUsing(fn($state) => Hash::make($state))
                     ->dehydrated(fn($state) => filled($state))
                     ->required(fn(string $context): bool => $context === 'create'),
-                Forms\Components\Toggle::make('is_admin')->label('Is admin?')->default(false)
+                Forms\Components\Toggle::make('is_admin')->label('Is admin?')->default(false),
+                Forms\Components\Toggle::make('blacklist')->default(false)
             ]);
     }
 

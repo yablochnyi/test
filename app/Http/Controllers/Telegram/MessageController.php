@@ -14,17 +14,21 @@ class MessageController extends Controller
 {
     public function index(Request $request)
     {
+
         $user = $this->getOrCreateUser($request);
 
-        $this->typing($request);
+        if ($user->blacklist === false) {
 
-        $messages = $this->getUserMessage($request);
+            $this->typing($request);
 
-        $response = $this->getAssistantResponse($messages);
+            $messages = $this->getUserMessage($request);
 
-        $this->saveChatContext($user, $request, $messages, $response);
+            $response = $this->getAssistantResponse($messages);
 
-        $this->sendAssistantResponse($request, $response);
+            $this->saveChatContext($user, $request, $messages, $response);
+
+            $this->sendAssistantResponse($request, $response);
+        }
     }
 
     public function getOrCreateUser(Request $request)
