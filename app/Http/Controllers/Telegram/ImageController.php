@@ -7,6 +7,8 @@ use App\Models\Chat;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use OpenAI\Exceptions\ErrorException;
 use OpenAI\Laravel\Facades\OpenAI;
 use OpenAI\Responses\Chat\CreateResponse;
 use Stichoza\GoogleTranslate\GoogleTranslate;
@@ -15,38 +17,43 @@ class ImageController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $this->getOrCreateUser($request);
+        try {
 
-        $this->typing($request);
+            $user = $this->getOrCreateUser($request);
 
-        $messages = $this->getUserMessage($request);
+            $this->typing($request);
 
-        $response = $this->getAssistantResponse($messages);
+            $messages = $this->getUserMessage($request);
 
-        $this->saveChatContext($user, $request, $messages, $response);
+            $response = $this->getAssistantResponse($messages);
 
-        $this->sendAssistantResponse($request, $response);
+            $this->saveChatContext($user, $request, $messages, $response);
+
+            $this->sendAssistantResponse($request, $response);
+
+        } catch (ErrorException $e) {
+            $this->error($request);
+        }
     }
 
     public function getOrCreateUser(Request $request)
     {
-        $user = User::firstOrCreate(
-            [
-                'telegram_id' => $request->input('message')['from']['id']
-            ],
-            [
-                'telegram_id' => $request->input('message')['from']['id'],
-                'username' => $request->input('message')['from']['username'],
-                'name' => $request->input('message')['from']['first_name'],
-            ]);
-        return $user;
+        $message = $request->input('message');
+        $userId = $message['from']['id'];
+        $username = $message['from']['username'] ?? $message['from']['last_name'];
+        $firstName = $message['from']['first_name'];
+
+        return User::firstOrCreate(
+            ['telegram_id' => $userId],
+            ['telegram_id' => $userId, 'username' => $username, 'name' => $firstName]
+        );
     }
 
     public function typing(Request $request)
     {
         Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendChatAction', [
             'chat_id' => $request->input('message')['from']['id'],
-            'action' => 'typing'
+            'action' => 'upload_photo'
         ]);
     }
 
@@ -56,12 +63,12 @@ class ImageController extends Controller
         return $messages;
     }
 
-    public function getAssistantResponse($messages): \OpenAI\Responses\Images\CreateResponse
+    public function getAssistantResponse($messages)
     {
-        $message = str_replace("нарисуй", "", $messages[0]['content']);
+        $message = str_replace("нарисуй", "", mb_strtolower($messages[0]['content']));
         $message = $this->translate($message);
         $response = OpenAI::images()->create([
-            'prompt' => $messages,
+            'prompt' => $message,
             'n' => 1,
             'size' => '512x512',
             'response_format' => 'url',
@@ -72,14 +79,14 @@ class ImageController extends Controller
         return $response;
     }
 
-    public function translate($message)
+    public function translate($message): string
     {
         $tr = new GoogleTranslate(); // Translates to 'en' from auto-detected language by default
 //        $tr->setSource('en'); // Translate from English
         $tr->setSource(); // Detect language automatically
         $tr->setTarget('en'); // Translate to Georgian
-        $tr->translate($message);
-        return $tr;
+        $text = $tr->translate($message);
+        return (string)$text;
     }
 
     public function saveChatContext($user, Request $request, $messages, $response)
@@ -96,10 +103,20 @@ class ImageController extends Controller
     public function sendAssistantResponse(Request $request, $response)
     {
         foreach ($response->data as $data) {
-            Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendMessage', [
+            Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendPhoto', [
                 'chat_id' => $request->input('message')['from']['id'],
-                'text' => $data->url
+                'photo' => $data->url,
+                'parse_mode' => 'html'
             ]);
         }
+    }
+
+    public function error(Request $request)
+    {
+        Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendMessage', [
+            'chat_id' => $request->input('message')['from']['id'],
+            'text' => 'Я не могу создавать неприемлемый или нежелательный контента, такого как распространение ложной информации, провокационных высказываний, оскорбительных или дискриминационных комментариев и других вредных видов контента',
+            'parse_mode' => 'html'
+        ]);
     }
 }

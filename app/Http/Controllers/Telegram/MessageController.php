@@ -29,16 +29,15 @@ class MessageController extends Controller
 
     public function getOrCreateUser(Request $request)
     {
-        $user = User::firstOrCreate(
-            [
-                'telegram_id' => $request->input('message')['from']['id']
-            ],
-            [
-                'telegram_id' => $request->input('message')['from']['id'],
-                'username' => $request->input('message')['from']['username'],
-                'name' => $request->input('message')['from']['first_name'],
-            ]);
-        return $user;
+        $message = $request->input('message');
+        $userId = $message['from']['id'];
+        $username = $message['from']['username'] ?? $message['from']['last_name'];
+        $firstName = $message['from']['first_name'];
+
+        return User::firstOrCreate(
+            ['telegram_id' => $userId],
+            ['telegram_id' => $userId, 'username' => $username, 'name' => $firstName]
+        );
     }
 
     public function typing(Request $request)
@@ -66,10 +65,10 @@ class MessageController extends Controller
     public function saveChatContext($user, Request $request, $messages, $response)
     {
         Chat::create([
-                'telegram_id' => $request->input('message')['from']['id'],
-                'user_id' => $user->id,
-                'context' => array_merge($messages, [['role' => 'assistant', 'content' => $response->choices[0]->message->content]])
-            ]);
+            'telegram_id' => $request->input('message')['from']['id'],
+            'user_id' => $user->id,
+            'context' => array_merge($messages, [['role' => 'assistant', 'content' => $response->choices[0]->message->content]])
+        ]);
     }
 
     public function sendAssistantResponse(Request $request, $response)
