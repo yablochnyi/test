@@ -42,7 +42,7 @@ class MessageController extends Controller
 
     public function typing(Request $request)
     {
-        Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendChatAction', [
+        Http::post('https://api.tlgr.org/bot' . config('bots')['api'] . '/sendChatAction', [
             'chat_id' => $request->input('message')['from']['id'],
             'action' => 'typing'
         ]);
@@ -73,7 +73,7 @@ class MessageController extends Controller
 
     public function sendAssistantResponse(Request $request, $response)
     {
-        Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendMessage', [
+        Http::post('https://api.tlgr.org/bot' . config('bots')['api'] . '/sendMessage', [
             'chat_id' => $request->input('message')['from']['id'],
             'text' => $response->choices[0]->message->content
         ]);

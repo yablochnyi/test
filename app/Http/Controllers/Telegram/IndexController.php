@@ -56,7 +56,7 @@ class IndexController extends Controller
                 $image = new ImageController();
                 return $image->index($request);
             } elseif ($text == '/start') {
-                Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendMessage', [
+                Http::post('https://api.tlgr.org/bot' . config('bots.api') . '/sendMessage', [
                     'chat_id' => $request->input('message')['from']['id'],
                     'text' => 'Добро пожаловать!'
                 ]);

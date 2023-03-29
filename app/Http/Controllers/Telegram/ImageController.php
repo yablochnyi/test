@@ -51,7 +51,7 @@ class ImageController extends Controller
 
     public function typing(Request $request)
     {
-        Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendChatAction', [
+        Http::post('https://api.tlgr.org/bot' . config('bots')['api'] . '/sendChatAction', [
             'chat_id' => $request->input('message')['from']['id'],
             'action' => 'upload_photo'
         ]);
@@ -103,7 +103,7 @@ class ImageController extends Controller
     public function sendAssistantResponse(Request $request, $response)
     {
         foreach ($response->data as $data) {
-            Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendPhoto', [
+            Http::post('https://api.tlgr.org/bot' . config('bots')['api'] . '/sendPhoto', [
                 'chat_id' => $request->input('message')['from']['id'],
                 'photo' => $data->url,
                 'parse_mode' => 'html'
@@ -113,7 +113,7 @@ class ImageController extends Controller
 
     public function error(Request $request)
     {
-        Http::post('https://api.tlgr.org/bot6265500701:AAEE7RplIj_t567pNCbFQk9O1xyCBSX7Yng/sendMessage', [
+        Http::post('https://api.tlgr.org/bot' . config('bots')['api'] . '/sendMessage', [
             'chat_id' => $request->input('message')['from']['id'],
             'text' => 'Я не могу создавать неприемлемый или нежелательный контента, такого как распространение ложной информации, провокационных высказываний, оскорбительных или дискриминационных комментариев и других вредных видов контента',
             'parse_mode' => 'html'
