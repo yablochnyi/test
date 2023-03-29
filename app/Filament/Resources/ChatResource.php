@@ -1,22 +1,25 @@
 <?php
 
-namespace App\Filament\Resources\UserResource\RelationManagers;
+namespace App\Filament\Resources;
 
+use App\Filament\Resources\ChatResource\Pages;
+use App\Filament\Resources\ChatResource\RelationManagers;
+use App\Models\Chat;
 use Filament\Forms;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\Form;
-use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
-class ChatsRelationManager extends RelationManager
+class ChatResource extends Resource
 {
-    protected static string $relationship = 'chats';
+    protected static ?string $model = Chat::class;
 
-    protected static ?string $recordTitleAttribute = 'user_id';
+    protected static ?string $navigationIcon = 'heroicon-o-collection';
 
     public static function form(Form $form): Form
     {
@@ -38,6 +41,7 @@ class ChatsRelationManager extends RelationManager
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('user_id'),
+                Tables\Columns\TextColumn::make('user.name'),
                 Tables\Columns\TextColumn::make('created_at')->sortable(),
                 Tables\Columns\TextColumn::make('user_message')
                     ->formatStateUsing(function ($state, $record) {
@@ -52,18 +56,31 @@ class ChatsRelationManager extends RelationManager
                         return Str::limit($content, 40);
                     })
             ])
-//            ->filters([
-//                //
-//            ])
-//            ->headerActions([
-//                Tables\Actions\CreateAction::make(),
-//            ])
+            ->defaultSort('created_at', 'desc')
+            ->filters([
+                //
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-//                Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
-//            ->bulkActions([
-//                Tables\Actions\DeleteBulkAction::make(),
-//            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListChats::route('/'),
+            'create' => Pages\CreateChat::route('/create'),
+            'edit' => Pages\EditChat::route('/{record}/edit'),
+        ];
     }
 }

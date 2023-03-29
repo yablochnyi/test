@@ -52,6 +52,6 @@ class User extends Authenticatable implements FilamentUser
 
     public function chats()
     {
-        return $this->hasMany(Chat::class);
+        return $this->hasMany(Chat::class)->latest();
     }
 }
